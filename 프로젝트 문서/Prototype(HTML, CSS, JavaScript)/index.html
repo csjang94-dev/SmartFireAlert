@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 화재 알리미 - 관리 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        }
+
+        .login-box {
+            background-color: #1a1a1a;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #2196F3;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background-color: #2196F3;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background-color: #1976D2;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background-color: #2a2a2a;
+        }
+
+        .btn-secondary:hover {
+            background-color: #3a3a3a;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .password-hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        /* Header */
+        .header {
+            background-color: #1a1a1a;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .header h1 {
+            color: #2196F3;
+            font-size: 1.5rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.maintenance {
+            background-color: #FFC107;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .user-info {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .user-info strong {
+            color: #2196F3;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-logout:hover {
+            background-color: #3a3a3a;
+        }
+
+        /* Navigation */
+        .nav {
+            background-color: #1a1a1a;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+        }
+
+        .nav li {
+            flex: 1;
+        }
+
+        .nav button {
+            width: 100%;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav button:hover {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .nav button.active {
+            background-color: #2a2a2a;
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #2196F3;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Dashboard - Webcam Grid */
+        .webcam-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .webcam-card {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+            border: 1px solid #2a2a2a;
+        }
+
+        .webcam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+        }
+
+        .webcam-header {
+            background-color: #0a0a0a;
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .webcam-title {
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+
+        .webcam-location {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .webcam-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .webcam-status.normal {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .webcam-status.alert {
+            background-color: #f44336;
+            color: #fff;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .webcam-display {
+            background-color: #000;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .webcam-display::after {
+            content: '실시간 영상';
+            position: absolute;
+            color: #444;
+        }
+
+        .webcam-info {
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #888;
+            background-color: #0a0a0a;
+        }
+
+        /* Cards and Lists */
+        .card {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            border: 1px solid #2a2a2a;
+        }
+
+        .card h3 {
+            color: #2196F3;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Table */
+        .table-container {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            border: 1px solid #2a2a2a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #0a0a0a;
+            padding: 1rem;
+            text-align: left;
+            color: #2196F3;
+            font-weight: bold;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        .log-type {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .log-type.fire {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .log-type.smoke {
+            background-color: #757575;
+            color: #fff;
+        }
+
+        .log-status.success {
+            color: #4CAF50;
+        }
+
+        .log-status.failed {
+            color: #f44336;
+        }
+
+        /* Item Lists */
+        .item-list {
+            margin-top: 1rem;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background-color: #0a0a0a;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .item-info h4 {
+            color: #e0e0e0;
+            margin-bottom: 0.3rem;
+        }
+
+        .item-info p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background-color: #2196F3;
+            color: #fff;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3a3a3a;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.6rem 1.2rem;
+            background-color: #2a2a2a;
+            color: #888;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .tab-btn.active {
+            background-color: #1a1a1a;
+            color: #2196F3;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Role indicator */
+        .role-indicator {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background-color: #2a2a2a;
+            color: #888;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .role-indicator.super-admin {
+            background-color: #2196F3;
+            color: #fff;
+        }
+
+        /* Alert Box */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            border: 1px solid #2196F3;
+            color: #2196F3;
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid #FFC107;
+            color: #FFC107;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .webcam-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .webcam-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav ul {
+                flex-wrap: wrap;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-right {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Controls row */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🔥 스마트 화재 알리미</h1>
+                <p>관리자 로그인</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>아이디</label>
+                    <input type="text" id="loginId" placeholder="아이디를 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <button type="submit" class="btn btn-full">로그인</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Change Page (First Login) -->
+    <div id="passwordChangePage" class="login-container hidden">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>비밀번호 변경</h1>
+                <p>최초 로그인 시 비밀번호를 변경해야 합니다</p>
+            </div>
+            <form id="passwordChangeForm">
+                <div class="form-group">
+                    <label>현재 비밀번호</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>새 비밀번호</label>
+                    <input type="password" id="newPassword" required>
+                    <p class="password-hint">최소 8자, 영문 대소문자/숫자/특수문자 중 3가지 이상</p>
+                </div>
+                <div class="form-group">
+                    <label>새 비밀번호 확인</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-full">비밀번호 변경</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔥 스마트 화재 알리미</h1>
+            <div class="header-right">
+                <div class="system-status">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText">시스템 동작중</span>
+                </div>
+                <div class="user-info">
+                    <strong id="userName">홍길동</strong> 님 <span id="userRole" class="role-indicator super-admin">총 책임자</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">로그아웃</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <ul>
+                <li><button class="nav-btn active" data-section="dashboard">대시보드</button></li>
+                <li><button class="nav-btn" data-section="logs">로그 관리</button></li>
+                <li><button class="nav-btn" data-section="webcams">웹캠 관리</button></li>
+                <li><button class="nav-btn" data-section="admins">관리자 설정</button></li>
+                <li><button class="nav-btn" data-section="control">시스템 제어</button></li>
+            </ul>
+        </nav>
+
+        <!-- Main Container -->
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2 class="section-title">실시간 모니터링</h2>
+                <div class="webcam-grid">
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #1 (실제)</div>
+                                <div class="webcam-location">1층 로비</div>
+                            </div>
+                            <span class="webcam-status normal">정상</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 방금 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #2 (가상)</div>
+                                <div class="webcam-location">2층 복도</div>
+                            </div>
+                            <span class="webcam-status normal">정상</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 1초 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #3 (가상)</div>
+                                <div class="webcam-location">주차장</div>
+                            </div>
+                            <span class="webcam-status alert">화재 감지!</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 방금 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #4 (가상)</div>
+                                <div class="webcam-location">3층 사무실</div>
+                            </div>
+                            <span class="webcam-status normal">정상</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 2초 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #5 (가상)</div>
+                                <div class="webcam-location">창고</div>
+                            </div>
+                            <span class="webcam-status normal">정상</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 1초 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+
+                    <div class="webcam-card">
+                        <div class="webcam-header">
+                            <div>
+                                <div class="webcam-title">웹캠 #6 (가상)</div>
+                                <div class="webcam-location">비상계단</div>
+                            </div>
+                            <span class="webcam-status normal">정상</span>
+                        </div>
+                        <div class="webcam-display"></div>
+                        <div class="webcam-info">
+                            <span>마지막 업데이트: 방금 전</span>
+                            <span>FPS: 30</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs" class="section">
+                <h2 class="section-title">로그 관리</h2>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="detection-logs">화재 감지 로그</button>
+                    <button class="tab-btn" data-tab="access-logs">접속 로그</button>
+                </div>
+
+                <!-- Detection Logs Tab -->
+                <div id="detection-logs" class="tab-content active">
+                    <div class="controls-row">
+                        <div class="controls-left">
+                            <button class="btn btn-secondary">필터</button>
+                            <button class="btn btn-secondary">날짜 선택</button>
+                        </div>
+                        <button class="btn">CSV 내보내기</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>발생 시간</th>
+                                    <th>위치</th>
+                                    <th>감지 유형</th>
+                                    <th>감지율</th>
+                                    <th>알림 상태</th>
+                                    <th>비고</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>50</td>
+                                    <td>2026-01-07 14:23:45</td>
+                                    <td>주차장</td>
+                                    <td><span class="log-type fire">불꽃</span></td>
+                                    <td>75%</td>
+                                    <td class="log-status success">✓ 발송 완료</td>
+                                    <td>정탐지</td>
+                                </tr>
+                                <tr>
+                                    <td>49</td>
+                                    <td>2026-01-07 13:15:22</td>
+                                    <td>2층 복도</td>
+                                    <td><span class="log-type smoke">연기</span></td>
+                                    <td>68%</td>
+                                    <td class="log-status failed">✗ 발송 실패</td>
+                                    <td>재시도 완료</td>
+                                </tr>
+                                <tr>
+                                    <td>48</td>
+                                    <td>2026-01-07 11:45:10</td>
+                                    <td>1층 로비</td>
+                                    <td><span class="log-type fire">불꽃</span></td>
+                                    <td>72%</td>
+                                    <td class="log-status success">✓ 발송 완료</td>
+                                    <td>오탐지</td>
+                                </tr>
+                                <tr>
+                                    <td>47</td>
+                                    <td>2026-01-07 10:22:33</td>
+                                    <td>창고</td>
+                                    <td><span class="log-type smoke">연기</span></td>
+                                    <td>70%</td>
+                                    <td class="log-status success">✓ 발송 완료</td>
+                                    <td>정탐지</td>
+                                </tr>
+                                <tr>
+                                    <td>46</td>
+                                    <td>2026-01-07 09:10:15</td>
+                                    <td>3층 사무실</td>
+                                    <td><span class="log-type fire">불꽃</span></td>
+                                    <td>78%</td>
+                                    <td class="log-status success">✓ 발송 완료</td>
+                                    <td>오탐지</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 1rem; color: #888; font-size: 0.9rem;">* 최신 50개 로그 표시 중 (전체 로그는 DB에 6개월간 보관)</p>
+                </div>
+
+                <!-- Access Logs Tab -->
+                <div id="access-logs" class="tab-content">
+                    <div class="alert alert-info">
+                        모든 로그인 시도가 IP 주소와 함께 기록됩니다. 의심스러운 접속이 감지되면 총 책임자에게 알림이 발송됩니다.
+                    </div>
+                    <div class="controls-row">
+                        <div class="controls-left">
+                            <button class="btn btn-secondary">날짜 선택</button>
+                        </div>
+                        <button class="btn">CSV 내보내기</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>접속 시간</th>
+                                    <th>사용자</th>
+                                    <th>IP 주소</th>
+                                    <th>위치 (예상)</th>
+                                    <th>브라우저</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>125</td>
+                                    <td>2026-01-07 14:30:22</td>
+                                    <td>홍길동</td>
+                                    <td>192.168.1.100</td>
+                                    <td>서울, 한국</td>
+                                    <td>Chrome 120</td>
+                                    <td class="log-status success">✓ 성공</td>
+                                </tr>
+                                <tr>
+                                    <td>124</td>
+                                    <td>2026-01-07 13:45:10</td>
+                                    <td>김철수</td>
+                                    <td>192.168.1.105</td>
+                                    <td>서울, 한국</td>
+                                    <td>Firefox 121</td>
+                                    <td class="log-status success">✓ 성공</td>
+                                </tr>
+                                <tr>
+                                    <td>123</td>
+                                    <td>2026-01-07 12:20:33</td>
+                                    <td>admin</td>
+                                    <td>121.123.45.67</td>
+                                    <td>부산, 한국</td>
+                                    <td>Safari 17</td>
+                                    <td class="log-status failed">✗ 실패</td>
+                                </tr>
+                                <tr>
+                                    <td>122</td>
+                                    <td>2026-01-07 11:15:44</td>
+                                    <td>이영희</td>
+                                    <td>192.168.1.110</td>
+                                    <td>서울, 한국</td>
+                                    <td>Chrome 120</td>
+                                    <td class="log-status success">✓ 성공</td>
+                                </tr>
+                                <tr>
+                                    <td>121</td>
+                                    <td>2026-01-07 09:00:15</td>
+                                    <td>홍길동</td>
+                                    <td>192.168.1.100</td>
+                                    <td>서울, 한국</td>
+                                    <td>Chrome 120</td>
+                                    <td class="log-status success">✓ 성공</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 1rem; color: #888; font-size: 0.9rem;">* 접속 로그는 1년간 보관됩니다</p>
+                </div>
+            </section>
+
+            <!-- Webcam Management Section -->
+            <section id="webcams" class="section">
+                <h2 class="section-title">웹캠 관리</h2>
+                
+                <div class="card">
+                    <h3>현재 등록된 웹캠</h3>
+                    <div class="item-list">
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #1 (실제)</h4>
+                                <p>위치: 1층 로비 | 상태: 정상 | URL: rtsp://192.168.1.100:554/stream</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #2 (가상)</h4>
+                                <p>위치: 2층 복도 | 상태: 정상 | URL: virtual://cam002</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #3 (가상)</h4>
+                                <p>위치: 주차장 | 상태: 정상 | URL: virtual://cam003</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #4 (가상)</h4>
+                                <p>위치: 3층 사무실 | 상태: 정상 | URL: virtual://cam004</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #5 (가상)</h4>
+                                <p>위치: 창고 | 상태: 정상 | URL: virtual://cam005</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>웹캠 #6 (가상)</h4>
+                                <p>위치: 비상계단 | 상태: 정상 | URL: virtual://cam006</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>새 웹캠 추가</h3>
+                    <div class="form-group">
+                        <label>웹캠 이름</label>
+                        <input type="text" placeholder="예: 웹캠 #7">
+                    </div>
+                    <div class="form-group">
+                        <label>웹캠 유형</label>
+                        <select>
+                            <option>실제 웹캠</option>
+                            <option>가상 웹캠</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>설치 위치</label>
+                        <input type="text" placeholder="예: 4층 회의실">
+                    </div>
+                    <div class="form-group">
+                        <label>웹캠 URL/ID</label>
+                        <input type="text" placeholder="예: rtsp://192.168.1.101:554/stream">
+                    </div>
+                    <button class="btn">웹캠 추가</button>
+                </div>
+            </section>
+
+            <!-- Admin Settings Section -->
+            <section id="admins" class="section">
+                <h2 class="section-title">관리자 설정</h2>
+                
+                <div class="card">
+                    <h3>내 정보 수정</h3>
+                    <div class="form-group">
+                        <label>이름</label>
+                        <input type="text" value="홍길동">
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="tel" value="010-1234-5678">
+                    </div>
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input type="email" value="admin@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>비밀번호 변경</label>
+                        <input type="password" placeholder="새 비밀번호">
+                    </div>
+                    <button class="btn">정보 저장</button>
+                </div>
+
+                <div class="card" id="adminManagement">
+                    <h3>관리자 목록 <span class="badge">총 책임자 전용</span></h3>
+                    <div class="alert alert-info">
+                        총 책임자만 관리자 계정을 생성하고 담당 구역을 설정할 수 있습니다.
+                    </div>
+                    <div class="item-list">
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>홍길동 <span class="badge">총 책임자</span></h4>
+                                <p>담당 구역: 전체 | 연락처: 010-1234-5678 | 이메일: admin@example.com</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">수정</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>김철수</h4>
+                                <p>담당 구역: 1층, 2층 | 연락처: 010-2345-6789 | 이메일: kim@example.com</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">구역 수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-info">
+                                <h4>이영희</h4>
+                                <p>담당 구역: 3층, 주차장 | 연락처: 010-3456-7890 | 이메일: lee@example.com</p>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn btn-small btn-secondary">구역 수정</button>
+                                <button class="btn btn-small btn-danger">삭제</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" id="addAdminForm">
+                    <h3>새 관리자 추가 <span class="badge">총 책임자 전용</span></h3>
+                    <div class="form-group">
+                        <label>이름</label>
+                        <input type="text" placeholder="관리자 이름">
+                    </div>
+                    <div class="form-group">
+                        <label>아이디</label>
+                        <input type="text" placeholder="로그인 아이디">
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="tel" placeholder="010-0000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input type="email" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>임시 비밀번호</label>
+                        <input type="password" placeholder="최초 로그인용 임시 비밀번호">
+                        <p class="password-hint">관리자는 최초 로그인 시 비밀번호를 변경해야 합니다</p>
+                    </div>
+                    <div class="form-group">
+                        <label>담당 구역</label>
+                        <textarea rows="3" placeholder="예: 1층 로비, 2층 복도, 주차장"></textarea>
+                    </div>
+                    <button class="btn">관리자 추가</button>
+                </div>
+            </section>
+
+            <!-- System Control Section -->
+            <section id="control" class="section">
+                <h2 class="section-title">시스템 제어</h2>
+                
+                <div class="control-panel">
+                    <div class="card">
+                        <h3>시스템 상태 제어</h3>
+                        <div class="toggle-switch">
+                            <label class="switch">
+                                <input type="checkbox" id="systemToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span id="toggleLabel">시스템 동작중</span>
+                        </div>
+                        <p style="color: #888; font-size: 0.9rem; margin-top: 1rem;">
+                            점검중으로 전환하면 화재 감지 및 알림 발송이 중지됩니다.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <h3>테스트 알림 발송</h3>
+                        <p style="color: #888; font-size: 0.9rem; margin-bottom: 1rem;">
+                            알림 시스템의 정상 작동 여부를 확인할 수 있습니다.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn">문자 테스트</button>
+                            <button class="btn btn-secondary">이메일 테스트</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>화재 감지 설정</h3>
+                        <div class="form-group">
+                            <label>감지 지속 시간 (초)</label>
+                            <input type="number" value="3" min="1" max="10">
+                            <p class="password-hint">불꽃 또는 연기가 임계값 이상으로 지속되어야 하는 시간</p>
+                        </div>
+                        <div class="form-group">
+                            <label>불꽃 감지 임계값 (%)</label>
+                            <input type="number" value="70" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>연기 감지 임계값 (%)</label>
+                            <input type="number" value="65" min="0" max="100">
+                        </div>
+                        <div class="alert alert-warning">
+                            임계값이 너무 낮으면 오탐지가 증가할 수 있습니다.
+                        </div>
+                        <button class="btn">설정 저장</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>시스템 정보</h3>
+                        <p style="margin-bottom: 0.5rem;"><strong>버전:</strong> v1.1.0</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>가동 시간:</strong> 15일 3시간 22분</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>총 감지 횟수:</strong> 147회</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>알림 발송 성공률:</strong> 98.6%</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>영상 저장:</strong> 전후 30초 (총 1분)</p>
+                        <button class="btn btn-secondary" style="margin-top: 1rem;">시스템 재시작</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        let isLoggedIn = false;
+        let isSuperAdmin = true; // For demo, set to true
+        let needPasswordChange = false;
+
+        // Login Form
+        document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Demo login (in real app, this would be API call)
+            if (id && password) {
+                // Simulate first login check
+                if (password === 'temp1234') {
+                    needPasswordChange = true;
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('passwordChangePage').classList.remove('hidden');
+                } else {
+                    isLoggedIn = true;
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                }
+            }
+        });
+
+        // Password Change Form
+        document.getElementById('passwordChangeForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const currentPw = document.getElementById('currentPassword').value;
+            const newPw = document.getElementById('newPassword').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+
+            if (newPw !== confirmPw) {
+                alert('새 비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            // Validate password strength
+            if (newPw.length < 8) {
+                alert('비밀번호는 최소 8자 이상이어야 합니다.');
+                return;
+            }
+
+            // Success
+            alert('비밀번호가 변경되었습니다.');
+            isLoggedIn = true;
+            document.getElementById('passwordChangePage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                isLoggedIn = false;
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('loginPage').classList.remove('hidden');
+                document.getElementById('loginForm').reset();
+            }
+        }
+
+        // Navigation
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.section');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetSection = button.getAttribute('data-section');
+                
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                button.classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+            });
+        });
+
+        // Tab Navigation
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.getAttribute('data-tab');
+                
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                button.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // System Toggle
+        const systemToggle = document.getElementById('systemToggle');
+        const toggleLabel = document.getElementById('toggleLabel');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+
+        systemToggle?.addEventListener('change', () => {
+            if (systemToggle.checked) {
+                toggleLabel.textContent = '시스템 동작중';
+                statusText.textContent = '시스템 동작중';
+                statusIndicator.classList.remove('maintenance');
+            } else {
+                toggleLabel.textContent = '시스템 점검중';
+                statusText.textContent = '시스템 점검중';
+                statusIndicator.classList.add('maintenance');
+            }
+        });
+
+        // Show/Hide admin-only sections based on role
+        if (!isSuperAdmin) {
+            document.getElementById('adminManagement')?.classList.add('hidden');
+            document.getElementById('addAdminForm')?.classList.add('hidden');
+        }
+
+        // Auto-start with login page
+        document.addEventListener('DOMContentLoaded', () => {
+            // For demo purposes, you can uncomment below to skip login
+            // document.getElementById('loginPage').classList.add('hidden');
+            // document.getElementById('mainApp').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>

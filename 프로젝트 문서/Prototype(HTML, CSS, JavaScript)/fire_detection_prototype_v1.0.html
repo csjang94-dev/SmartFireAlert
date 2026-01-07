@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 화재 알리미 - 관리 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #eee;
+        }
+
+        /* Header */
+        .header {
+            background-color: #16213e;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #ff6b6b;
+            font-size: 1.5rem;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #51cf66;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.maintenance {
+            background-color: #ffd43b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Navigation */
+        .nav {
+            background-color: #0f3460;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0;
+        }
+
+        .nav li {
+            flex: 1;
+        }
+
+        .nav button {
+            width: 100%;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav button:hover {
+            background-color: #16213e;
+            color: #fff;
+        }
+
+        .nav button.active {
+            background-color: #16213e;
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #ff6b6b;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Dashboard - Webcam Grid */
+        .webcam-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .webcam-card {
+            background-color: #16213e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .webcam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .webcam-header {
+            background-color: #0f3460;
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .webcam-title {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .webcam-location {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .webcam-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .webcam-status.normal {
+            background-color: #51cf66;
+            color: #000;
+        }
+
+        .webcam-status.alert {
+            background-color: #ff6b6b;
+            color: #fff;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .webcam-display {
+            background-color: #000;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .webcam-display::after {
+            content: '실시간 영상';
+            position: absolute;
+            color: #666;
+        }
+
+        .webcam-info {
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        /* Log Table */
+        .log-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #ff5252;
+        }
+
+        .btn-secondary {
+            background-color: #0f3460;
+        }
+
+        .btn-secondary:hover {
+            background-color: #16213e;
+        }
+
+        .log-table {
+            width: 100%;
+            background-color: #16213e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .log-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-table th {
+            background-color: #0f3460;
+            padding: 1rem;
+            text-align: left;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .log-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .log-table tr:hover {
+            background-color: #1a2942;
+        }
+
+        .log-type {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .log-type.fire {
+            background-color: #ff6b6b;
+        }
+
+        .log-type.smoke {
+            background-color: #868e96;
+        }
+
+        .log-status.success {
+            color: #51cf66;
+        }
+
+        .log-status.failed {
+            color: #ff6b6b;
+        }
+
+        /* Webcam Management */
+        .webcam-list {
+            background-color: #16213e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .webcam-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background-color: #0f3460;
+            border-radius: 6px;
+        }
+
+        .webcam-item-info h4 {
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .webcam-item-info p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .webcam-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background-color: #c92a2a;
+        }
+
+        .btn-danger:hover {
+            background-color: #a61e1e;
+        }
+
+        .add-webcam-form {
+            background-color: #16213e;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #0f3460;
+            border: 1px solid #1a2942;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        /* Admin Settings */
+        .settings-card {
+            background-color: #16213e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-card h3 {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+        }
+
+        .admin-list {
+            margin-top: 1rem;
+        }
+
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #0f3460;
+            border-radius: 6px;
+        }
+
+        .admin-info h4 {
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .admin-info p {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background-color: #ffd43b;
+            color: #000;
+        }
+
+        /* System Control */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .control-card {
+            background-color: #16213e;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .control-card h3 {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #51cf66;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .test-section {
+            margin-top: 1rem;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .webcam-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .webcam-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav ul {
+                flex-wrap: wrap;
+            }
+            
+            .log-table {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔥 스마트 화재 알리미</h1>
+        <div class="system-status">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span id="statusText">시스템 동작중</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul>
+            <li><button class="nav-btn active" data-section="dashboard">대시보드</button></li>
+            <li><button class="nav-btn" data-section="logs">로그 관리</button></li>
+            <li><button class="nav-btn" data-section="webcams">웹캠 관리</button></li>
+            <li><button class="nav-btn" data-section="admins">관리자 설정</button></li>
+            <li><button class="nav-btn" data-section="control">시스템 제어</button></li>
+        </ul>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <h2 class="section-title">실시간 모니터링</h2>
+            <div class="webcam-grid">
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #1 (실제)</div>
+                            <div class="webcam-location">1층 로비</div>
+                        </div>
+                        <span class="webcam-status normal">정상</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 방금 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #2 (가상)</div>
+                            <div class="webcam-location">2층 복도</div>
+                        </div>
+                        <span class="webcam-status normal">정상</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 1초 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #3 (가상)</div>
+                            <div class="webcam-location">주차장</div>
+                        </div>
+                        <span class="webcam-status alert">화재 감지!</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 방금 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #4 (가상)</div>
+                            <div class="webcam-location">3층 사무실</div>
+                        </div>
+                        <span class="webcam-status normal">정상</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 2초 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #5 (가상)</div>
+                            <div class="webcam-location">창고</div>
+                        </div>
+                        <span class="webcam-status normal">정상</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 1초 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+
+                <div class="webcam-card">
+                    <div class="webcam-header">
+                        <div>
+                            <div class="webcam-title">웹캠 #6 (가상)</div>
+                            <div class="webcam-location">비상계단</div>
+                        </div>
+                        <span class="webcam-status normal">정상</span>
+                    </div>
+                    <div class="webcam-display"></div>
+                    <div class="webcam-info">
+                        <span>마지막 업데이트: 방금 전</span>
+                        <span>FPS: 30</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section id="logs" class="section">
+            <h2 class="section-title">로그 관리</h2>
+            <div class="log-controls">
+                <div>
+                    <button class="btn btn-secondary">필터</button>
+                    <button class="btn btn-secondary">날짜 선택</button>
+                </div>
+                <button class="btn">CSV 내보내기</button>
+            </div>
+            <div class="log-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>발생 시간</th>
+                            <th>위치</th>
+                            <th>감지 유형</th>
+                            <th>알림 상태</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>50</td>
+                            <td>2026-01-07 14:23:45</td>
+                            <td>주차장</td>
+                            <td><span class="log-type fire">불꽃</span></td>
+                            <td class="log-status success">✓ 발송 완료</td>
+                            <td>정탐지</td>
+                        </tr>
+                        <tr>
+                            <td>49</td>
+                            <td>2026-01-07 13:15:22</td>
+                            <td>2층 복도</td>
+                            <td><span class="log-type smoke">연기</span></td>
+                            <td class="log-status failed">✗ 발송 실패</td>
+                            <td>재시도 완료</td>
+                        </tr>
+                        <tr>
+                            <td>48</td>
+                            <td>2026-01-07 11:45:10</td>
+                            <td>1층 로비</td>
+                            <td><span class="log-type fire">불꽃</span></td>
+                            <td class="log-status success">✓ 발송 완료</td>
+                            <td>오탐지</td>
+                        </tr>
+                        <tr>
+                            <td>47</td>
+                            <td>2026-01-07 10:22:33</td>
+                            <td>창고</td>
+                            <td><span class="log-type smoke">연기</span></td>
+                            <td class="log-status success">✓ 발송 완료</td>
+                            <td>정탐지</td>
+                        </tr>
+                        <tr>
+                            <td>46</td>
+                            <td>2026-01-07 09:10:15</td>
+                            <td>3층 사무실</td>
+                            <td><span class="log-type fire">불꽃</span></td>
+                            <td class="log-status success">✓ 발송 완료</td>
+                            <td>오탐지</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 1rem; color: #aaa; font-size: 0.9rem;">* 최신 50개 로그 표시 중 (전체 로그는 DB에 6개월간 보관)</p>
+        </section>
+
+        <!-- Webcam Management Section -->
+        <section id="webcams" class="section">
+            <h2 class="section-title">웹캠 관리</h2>
+            
+            <div class="webcam-list">
+                <h3 style="color: #ff6b6b; margin-bottom: 1rem;">현재 등록된 웹캠</h3>
+                
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #1 (실제)</h4>
+                        <p>위치: 1층 로비 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #2 (가상)</h4>
+                        <p>위치: 2층 복도 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #3 (가상)</h4>
+                        <p>위치: 주차장 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #4 (가상)</h4>
+                        <p>위치: 3층 사무실 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #5 (가상)</h4>
+                        <p>위치: 창고 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+
+                <div class="webcam-item">
+                    <div class="webcam-item-info">
+                        <h4>웹캠 #6 (가상)</h4>
+                        <p>위치: 비상계단 | 상태: 정상</p>
+                    </div>
+                    <div class="webcam-item-actions">
+                        <button class="btn btn-small btn-secondary">수정</button>
+                        <button class="btn btn-small btn-danger">삭제</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-webcam-form">
+                <h3 style="color: #ff6b6b; margin-bottom: 1rem;">새 웹캠 추가</h3>
+                <div class="form-group">
+                    <label>웹캠 이름</label>
+                    <input type="text" placeholder="예: 웹캠 #7">
+                </div>
+                <div class="form-group">
+                    <label>웹캠 유형</label>
+                    <select>
+                        <option>실제 웹캠</option>
+                        <option>가상 웹캠</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>설치 위치</label>
+                    <input type="text" placeholder="예: 4층 회의실">
+                </div>
+                <div class="form-group">
+                    <label>웹캠 URL/ID</label>
+                    <input type="text" placeholder="예: rtsp://192.168.1.100:554/stream">
+                </div>
+                <button class="btn">웹캠 추가</button>
+            </div>
+        </section>
+
+        <!-- Admin Settings Section -->
+        <section id="admins" class="section">
+            <h2 class="section-title">관리자 설정</h2>
+            
+            <div class="settings-card">
+                <h3>내 정보 수정</h3>
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" value="홍길동">
+                </div>
+                <div class="form-group">
+                    <label>연락처</label>
+                    <input type="tel" value="010-1234-5678">
+                </div>
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" value="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label>비밀번호 변경</label>
+                    <input type="password" placeholder="새 비밀번호">
+                </div>
+                <button class="btn">정보 저장</button>
+            </div>
+
+            <div class="settings-card">
+                <h3>관리자 목록 (총 책임자 전용)</h3>
+                <div class="admin-list">
+                    <div class="admin-item">
+                        <div class="admin-info">
+                            <h4>홍길동 <span class="badge">총 책임자</span></h4>
+                            <p>담당 구역: 전체 | 연락처: 010-1234-5678</p>
+                        </div>
+                        <button class="btn btn-small btn-secondary">편집</button>
+                    </div>
+
+                    <div class="admin-item">
+                        <div class="admin-info">
+                            <h4>김철수</h4>
+                            <p>담당 구역: 1층, 2층 | 연락처: 010-2345-6789</p>
+                        </div>
+                        <button class="btn btn-small btn-secondary">편집</button>
+                    </div>
+
+                    <div class="admin-item">
+                        <div class="admin-info">
+                            <h4>이영희</h4>
+                            <p>담당 구역: 3층, 주차장 | 연락처: 010-3456-7890</p>
+                        </div>
+                        <button class="btn btn-small btn-secondary">편집</button>
+                    </div>
+                </div>
+                <button class="btn" style="margin-top: 1rem;">새 관리자 추가</button>
+            </div>
+        </section>
+
+        <!-- System Control Section -->
+        <section id="control" class="section">
+            <h2 class="section-title">시스템 제어</h2>
+            
+            <div class="control-panel">
+                <div class="control-card">
+                    <h3>시스템 상태 제어</h3>
+                    <div class="toggle-switch">
+                        <label class="switch">
+                            <input type="checkbox" id="systemToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span id="toggleLabel">시스템 동작중</span>
+                    </div>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-top: 1rem;">
+                        점검중으로 전환하면 화재 감지 및 알림 발송이 중지됩니다.
+                    </p>
+                </div>
+
+                <div class="control-card">
+                    <h3>테스트 알림 발송</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">
+                        알림 시스템의 정상 작동 여부를 확인할 수 있습니다.
+                    </p>
+                    <div class="test-section">
+                        <div class="test-buttons">
+                            <button class="btn">문자 테스트</button>
+                            <button class="btn btn-secondary">이메일 테스트</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3>감지 설정</h3>
+                    <div class="form-group">
+                        <label>감지 지속 시간 (초)</label>
+                        <input type="number" value="3" min="1" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>불꽃 감지 임계값 (%)</label>
+                        <input type="number" value="70" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>연기 감지 임계값 (%)</label>
+                        <input type="number" value="65" min="0" max="100">
+                    </div>
+                    <button class="btn">설정 저장</button>
+                </div>
+
+                <div class="control-card">
+                    <h3>시스템 정보</h3>
+                    <p style="margin-bottom: 0.5rem;"><strong>버전:</strong> v1.0.0</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>가동 시간:</strong> 15일 3시간 22분</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>총 감지 횟수:</strong> 147회</p>
+                    <p style="margin-bottom: 0.5rem;"><strong>알림 발송 성공률:</strong> 98.6%</p>
+                    <button class="btn btn-secondary" style="margin-top: 1rem;">시스템 재시작</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Navigation
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.section');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetSection = button.getAttribute('data-section');
+                
+                // Remove active class from all buttons and sections
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Add active class to clicked button and target section
+                button.classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+            });
+        });
+
+        // System Toggle
+        const systemToggle = document.getElementById('systemToggle');
+        const toggleLabel = document.getElementById('toggleLabel');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+
+        systemToggle.addEventListener('change', () => {
+            if (systemToggle.checked) {
+                toggleLabel.textContent = '시스템 동작중';
+                statusText.textContent = '시스템 동작중';
+                statusIndicator.classList.remove('maintenance');
+            } else {
+                toggleLabel.textContent = '시스템 점검중';
+                statusText.textContent = '시스템 점검중';
+                statusIndicator.classList.add('maintenance');
+            }
+        });
+
+        // Test Alerts
+        document.querySelectorAll('.test-buttons .btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('테스트 알림이 발송되었습니다!');
+            });
+        });
+    </script>
+</body>
+</html>
